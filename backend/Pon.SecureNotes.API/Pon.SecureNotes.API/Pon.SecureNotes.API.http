@@ -1,0 +1,6 @@
+@Pon.SecureNotes.API_HostAddress = http://localhost:5073
+
+GET {{Pon.SecureNotes.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

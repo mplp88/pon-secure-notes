@@ -1,0 +1,42 @@
+version: '3.9'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: secure-notes-sql
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=[YourDBPassword]
+    ports:
+      - '1433:1433'
+    volumes:
+      - sql_data:/var/opt/mssql
+
+  backend:
+    build:
+      context: ./backend/Pon.SecureNotes.API
+    container_name: secure-notes-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__Default=Server=sqlserver;Database=SecureNotes;User=sa;Password=[YourDBPassword];TrustServerCertificate=True
+      - Crypto__CryptoKey=[YourCryptoKey]
+      - JWT__ExpiryInMinutes=60
+      - JWT__SecretKey=[YourJWTSecretKey]
+    ports:
+      - '8080:8080'
+    depends_on:
+      - sqlserver
+
+  frontend:
+    build:
+      context: ./frontend/pon-secure-notes-next
+    container_name: secure-notes-frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080 # Update if backend URL changes
+    ports:
+      - '3000:3000'
+    depends_on:
+      - backend
+
+volumes:
+  sql_data:
